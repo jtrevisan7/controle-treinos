@@ -1,4 +1,4 @@
-name: CI - Controle de Treinos
+name: CI/CD - Controle de Treinos
 
 on:
   push:
@@ -10,7 +10,9 @@ on:
       - main
 
 jobs:
+
   testes:
+    name: Testes automatizados
     runs-on: ubuntu-latest
 
     steps:
@@ -31,3 +33,15 @@ jobs:
         run: python -m pytest
         env:
           PYTHONPATH: .
+
+  docker:
+    name: Build Docker
+    runs-on: ubuntu-latest
+    needs: testes
+
+    steps:
+      - name: Baixar codigo
+        uses: actions/checkout@v6
+
+      - name: Construir imagem Docker
+        run: docker build -t controle-treinos .
