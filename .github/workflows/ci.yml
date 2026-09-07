@@ -9,6 +9,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
 
   testes:
@@ -35,7 +39,7 @@ jobs:
           PYTHONPATH: .
 
   docker:
-    name: Build Docker
+    name: Build e Publicacao Docker
     runs-on: ubuntu-latest
     needs: testes
 
@@ -43,5 +47,19 @@ jobs:
       - name: Baixar codigo
         uses: actions/checkout@v6
 
+      - name: Login no GitHub Container Registry
+        if: github.event_name == 'push'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Construir imagem Docker
-        run: docker build -t controle-treinos .
+        run: |
+          docker build -t ghcr.io/${{ github.repository_owner }}/controle-treinos:latest .
+
+      - name: Publicar imagem no GHCR
+        if: github.event_name == 'push'
+        run: |
+          docker push ghcr.io/${{ github.repository_owner }}/controle-treinos:latest
