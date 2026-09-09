@@ -2,10 +2,17 @@
 
 set -e
 
-echo "Iniciando deploy..."
+echo "Iniciando deploy da aplicacao Controle de Treinos..."
 
-docker compose down
+docker pull ghcr.io/jtrevisan7/controle-treinos:latest
 
-docker compose up -d --build
+docker stop controle-treinos || true
+
+docker rm controle-treinos || true
+
+docker run -d \
+  --name controle-treinos \
+  -p 8000:8000 \
+  ghcr.io/jtrevisan7/controle-treinos:latest
 
 echo "Deploy concluido com sucesso."
